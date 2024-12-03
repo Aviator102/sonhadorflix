@@ -1,0 +1,263 @@
+<html><head><base href="https://"><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Netflix Clone</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Netflix Sans', Arial, sans-serif;
+}
+
+body {
+  background: #141414;
+  color: white;
+}
+
+.navbar {
+  padding: 20px 40px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
+  position: fixed;
+  width: 100%;
+  z-index: 999;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.logo {
+  color: #E50914;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.search-box {
+  flex: 0 1 300px;
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  background: rgba(255,255,255,0.2);
+  color: white;
+  font-size: 1rem;
+}
+
+.search-input::placeholder {
+  color: rgba(255,255,255,0.5);
+}
+
+.search-input:focus {
+  outline: none;
+  background: rgba(255,255,255,0.3);
+}
+
+.filters {
+  display: flex;
+  gap: 15px;
+}
+
+.filter-btn {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.filter-btn.active {
+  background: #E50914;
+}
+
+.filter-btn:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.content {
+  padding: 80px 40px 20px;
+}
+
+.movies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.movie-card {
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+  transition: transform 0.3s;
+  cursor: pointer;
+}
+
+.movie-card:hover {
+  transform: scale(1.05);
+}
+
+.movie-poster {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  background: #2f2f2f;
+}
+
+.movie-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 10px;
+  background: rgba(0,0,0,0.8);
+}
+
+.movie-title {
+  font-size: 0.9rem;
+  margin-bottom: 5px;
+}
+
+.movie-category {
+  font-size: 0.8rem;
+  color: #999;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  font-size: 1.2rem;
+}
+</style>
+</head>
+<body>
+<div class="navbar">
+  <div class="logo">NETFLIX</div>
+  <div class="search-box">
+    <input type="text" class="search-input" placeholder="Buscar títulos..." id="searchInput">
+  </div>
+  <div class="filters">
+    <button class="filter-btn active" data-filter="all">Todos</button>
+    <button class="filter-btn" data-filter="Filmes">Filmes</button>
+    <button class="filter-btn" data-filter="Series">Séries</button>
+    <button class="filter-btn" data-filter="Lancamentos">Lançamentos</button>
+  </div>
+</div>
+
+<div class="content">
+  <div class="movies-grid" id="moviesGrid">
+    <div class="loading">Carregando...</div>
+  </div>
+</div>
+
+<script>
+async function fetchMovies() {
+  try {
+    const response = await fetch('https://raw.githubusercontent.com/Aviator102/iptvfree/refs/heads/main/serie8');
+    const text = await response.text();
+    
+    const lines = text.split('\n');
+    const movies = [];
+    
+    for(let i = 0; i < lines.length; i++) {
+      if(lines[i].startsWith('#EXTINF')) {
+        const movieInfo = lines[i];
+        const movieUrl = lines[i + 1];
+        
+        const titleMatch = movieInfo.match(/tvg-name="([^"]+)"/);
+        const logoMatch = movieInfo.match(/tvg-logo="([^"]+)"/);
+        const categoryMatch = movieInfo.match(/group-title="([^"]+)"/);
+        
+        if(titleMatch && logoMatch && categoryMatch) {
+          movies.push({
+            title: titleMatch[1],
+            logo: logoMatch[1],
+            url: movieUrl.trim(),
+            category: categoryMatch[1]
+          });
+        }
+      }
+    }
+    
+    return movies;
+  } catch(error) {
+    console.error('Error fetching movies:', error);
+    return [];
+  }
+}
+
+function renderMovies(movies, filter = 'all', searchTerm = '') {
+  const grid = document.getElementById('moviesGrid');
+  grid.innerHTML = '';
+  
+  let filteredMovies = filter === 'all' 
+    ? movies 
+    : movies.filter(movie => movie.category.includes(filter));
+    
+  if (searchTerm) {
+    const searchLower = searchTerm.toLowerCase();
+    filteredMovies = filteredMovies.filter(movie => 
+      movie.title.toLowerCase().includes(searchLower)
+    );
+  }
+  
+  if (filteredMovies.length === 0) {
+    grid.innerHTML = '<div class="loading">Nenhum título encontrado</div>';
+    return;
+  }
+  
+  filteredMovies.forEach(movie => {
+    const card = document.createElement('div');
+    card.className = 'movie-card';
+    
+    card.innerHTML = `
+      <img class="movie-poster" src="${movie.logo}" onerror="this.src='https://via.placeholder.com/200x300/2f2f2f/ffffff?text=No+Image'" alt="${movie.title}">
+      <div class="movie-info">
+        <div class="movie-title">${movie.title}</div>
+        <div class="movie-category">${movie.category}</div>
+      </div>
+    `;
+    
+    card.addEventListener('click', () => {
+      window.open(movie.url, '_blank');
+    });
+    
+    grid.appendChild(card);
+  });
+}
+
+// Initialize
+window.addEventListener('load', async () => {
+  const movies = await fetchMovies();
+  let currentFilter = 'all';
+  
+  // Setup search
+  const searchInput = document.getElementById('searchInput');
+  searchInput.addEventListener('input', (e) => {
+    const searchTerm = e.target.value;
+    renderMovies(movies, currentFilter, searchTerm);
+  });
+  
+  // Setup filter buttons
+  const filterButtons = document.querySelectorAll('.filter-btn');
+  filterButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      filterButtons.forEach(btn => btn.classList.remove('active'));
+      button.classList.add('active');
+      
+      currentFilter = button.dataset.filter;
+      renderMovies(movies, currentFilter, searchInput.value);
+    });
+  });
+  
+  // Initial render
+  renderMovies(movies);
+});
+</script>
+</body></html>
