@@ -164,8 +164,8 @@ async function fetchMovies() {
     const lines = text.split('\n');
     const movies = [];
     
-    for(let i = 0; i < lines.length; i++) {
-      if(lines[i].startsWith('#EXTINF')) {
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].startsWith('#EXTINF')) {
         const movieInfo = lines[i];
         const movieUrl = lines[i + 1];
         
@@ -173,7 +173,7 @@ async function fetchMovies() {
         const logoMatch = movieInfo.match(/tvg-logo="([^"]+)"/);
         const categoryMatch = movieInfo.match(/group-title="([^"]+)"/);
         
-        if(titleMatch && logoMatch && categoryMatch) {
+        if (titleMatch && logoMatch && categoryMatch) {
           movies.push({
             title: titleMatch[1],
             logo: logoMatch[1],
@@ -185,8 +185,8 @@ async function fetchMovies() {
     }
     
     return movies;
-  } catch(error) {
-    console.error('Error fetching movies:', error);
+  } catch (error) {
+    console.error('Erro ao buscar filmes:', error);
     return [];
   }
 }
@@ -215,13 +215,13 @@ function renderMovies(movies, filter = 'all', searchTerm = '') {
     const card = document.createElement('div');
     card.className = 'movie-card';
     
-    card.innerHTML = 
+    card.innerHTML = `
       <img class="movie-poster" src="${movie.logo}" onerror="this.src='https://via.placeholder.com/200x300/2f2f2f/ffffff?text=No+Image'" alt="${movie.title}">
       <div class="movie-info">
         <div class="movie-title">${movie.title}</div>
         <div class="movie-category">${movie.category}</div>
       </div>
-    ;
+    `;
     
     card.addEventListener('click', () => {
       const iframeContainer = document.createElement('div');
