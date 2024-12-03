@@ -11,12 +11,12 @@
       box-sizing: border-box;
       font-family: 'Netflix Sans', Arial, sans-serif;
     }
-    
+
     body {
       background: #141414;
       color: white;
     }
-    
+
     .navbar {
       padding: 20px 40px;
       background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
@@ -29,18 +29,18 @@
       flex-wrap: wrap;
       gap: 15px;
     }
-    
+
     .logo {
       color: #E50914;
       font-size: 2rem;
       font-weight: bold;
     }
-    
+
     .search-box {
       flex: 0 1 300px;
       position: relative;
     }
-    
+
     .search-input {
       width: 100%;
       padding: 8px 16px;
@@ -50,16 +50,16 @@
       color: white;
       font-size: 1rem;
     }
-    
+
     .search-input::placeholder {
       color: rgba(255,255,255,0.5);
     }
-    
+
     .filters {
       display: flex;
       gap: 15px;
     }
-    
+
     .filter-btn {
       background: rgba(255,255,255,0.1);
       border: none;
@@ -69,26 +69,26 @@
       cursor: pointer;
       transition: background 0.3s;
     }
-    
+
     .filter-btn.active {
       background: #E50914;
     }
-    
+
     .filter-btn:hover {
       background: rgba(255,255,255,0.2);
     }
-    
+
     .content {
       padding: 80px 40px 20px;
     }
-    
+
     .movies-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 20px;
       padding: 20px 0;
     }
-    
+
     .movie-card {
       position: relative;
       border-radius: 4px;
@@ -96,18 +96,18 @@
       transition: transform 0.3s;
       cursor: pointer;
     }
-    
+
     .movie-card:hover {
       transform: scale(1.05);
     }
-    
+
     .movie-poster {
       width: 100%;
       height: 300px;
       object-fit: cover;
       background: #2f2f2f;
     }
-    
+
     .movie-info {
       position: absolute;
       bottom: 0;
@@ -116,17 +116,17 @@
       padding: 10px;
       background: rgba(0,0,0,0.8);
     }
-    
+
     .movie-title {
       font-size: 0.9rem;
       margin-bottom: 5px;
     }
-    
+
     .movie-category {
       font-size: 0.8rem;
       color: #999;
     }
-    
+
     .loading {
       text-align: center;
       padding: 20px;
@@ -158,22 +158,23 @@
 <script>
 async function fetchMovies() {
   try {
-    const response = await fetch('https://raw.githubusercontent.com/Aviator102/iptvfree/refs/heads/main/serie8');
+    // Acessa o arquivo 'filmes.txt' que está no mesmo diretório no servidor
+    const response = await fetch('/filmes.txt');  // Caminho relativo após o deploy
     const text = await response.text();
-    
+
     const lines = text.split('\n');
     const movies = [];
-    
-    for(let i = 0; i < lines.length; i++) {
-      if(lines[i].startsWith('#EXTINF')) {
+
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].startsWith('#EXTINF')) {
         const movieInfo = lines[i];
         const movieUrl = lines[i + 1];
-        
+
         const titleMatch = movieInfo.match(/tvg-name="([^"]+)"/);
         const logoMatch = movieInfo.match(/tvg-logo="([^"]+)"/);
         const categoryMatch = movieInfo.match(/group-title="([^"]+)"/);
-        
-        if(titleMatch && logoMatch && categoryMatch) {
+
+        if (titleMatch && logoMatch && categoryMatch) {
           movies.push({
             title: titleMatch[1],
             logo: logoMatch[1],
@@ -183,9 +184,9 @@ async function fetchMovies() {
         }
       }
     }
-    
+
     return movies;
-  } catch(error) {
+  } catch (error) {
     console.error('Error fetching movies:', error);
     return [];
   }
@@ -194,27 +195,27 @@ async function fetchMovies() {
 function renderMovies(movies, filter = 'all', searchTerm = '') {
   const grid = document.getElementById('moviesGrid');
   grid.innerHTML = '';
-  
-  let filteredMovies = filter === 'all' 
-    ? movies 
+
+  let filteredMovies = filter === 'all'
+    ? movies
     : movies.filter(movie => movie.category.includes(filter));
-    
+
   if (searchTerm) {
     const searchLower = searchTerm.toLowerCase();
-    filteredMovies = filteredMovies.filter(movie => 
+    filteredMovies = filteredMovies.filter(movie =>
       movie.title.toLowerCase().includes(searchLower)
     );
   }
-  
+
   if (filteredMovies.length === 0) {
     grid.innerHTML = '<div class="loading">Nenhum título encontrado</div>';
     return;
   }
-  
+
   filteredMovies.forEach(movie => {
     const card = document.createElement('div');
     card.className = 'movie-card';
-    
+
     card.innerHTML = `
       <img class="movie-poster" src="${movie.logo}" onerror="this.src='https://via.placeholder.com/200x300/2f2f2f/ffffff?text=No+Image'" alt="${movie.title}">
       <div class="movie-info">
@@ -222,7 +223,7 @@ function renderMovies(movies, filter = 'all', searchTerm = '') {
         <div class="movie-category">${movie.category}</div>
       </div>
     `;
-    
+
     card.addEventListener('click', () => {
       const iframeContainer = document.createElement('div');
       iframeContainer.style.position = 'fixed';
@@ -235,13 +236,13 @@ function renderMovies(movies, filter = 'all', searchTerm = '') {
       iframeContainer.style.display = 'flex';
       iframeContainer.style.alignItems = 'center';
       iframeContainer.style.justifyContent = 'center';
-      
+
       const iframe = document.createElement('iframe');
       iframe.src = movie.url;
       iframe.style.width = '80%';
       iframe.style.height = '80%';
       iframe.style.border = 'none';
-      
+
       const closeButton = document.createElement('button');
       closeButton.innerText = 'Fechar';
       closeButton.style.position = 'absolute';
@@ -253,7 +254,7 @@ function renderMovies(movies, filter = 'all', searchTerm = '') {
       closeButton.style.border = 'none';
       closeButton.style.cursor = 'pointer';
       closeButton.style.zIndex = '1001';
-      
+
       closeButton.addEventListener('click', () => {
         document.body.removeChild(iframeContainer);
       });
@@ -271,7 +272,7 @@ function renderMovies(movies, filter = 'all', searchTerm = '') {
 window.addEventListener('load', async () => {
   const movies = await fetchMovies();
   let currentFilter = 'all';
-  
+
   const searchInput = document.getElementById('searchInput');
   searchInput.addEventListener('input', (e) => {
     renderMovies(movies, currentFilter, e.target.value);
