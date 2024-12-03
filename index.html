@@ -126,21 +126,6 @@
       font-size: 0.8rem;
       color: #999;
     }
-
-    .player-container {
-      margin-top: 20px;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-    }
-    
-    .player-container iframe {
-      width: 80%;
-      height: 500px;
-      border: none;
-      border-radius: 8px;
-      background: #000;
-    }
     
     .loading {
       text-align: center;
@@ -170,10 +155,6 @@
   </div>
 </div>
 
-<div class="player-container">
-  <iframe id="videoPlayer" src="" allowfullscreen></iframe>
-</div>
-
 <script>
 async function fetchMovies() {
   try {
@@ -183,8 +164,8 @@ async function fetchMovies() {
     const lines = text.split('\n');
     const movies = [];
     
-    for (let i = 0; i < lines.length; i++) {
-      if (lines[i].startsWith('#EXTINF')) {
+    for(let i = 0; i < lines.length; i++) {
+      if(lines[i].startsWith('#EXTINF')) {
         const movieInfo = lines[i];
         const movieUrl = lines[i + 1];
         
@@ -192,7 +173,7 @@ async function fetchMovies() {
         const logoMatch = movieInfo.match(/tvg-logo="([^"]+)"/);
         const categoryMatch = movieInfo.match(/group-title="([^"]+)"/);
         
-        if (titleMatch && logoMatch && categoryMatch) {
+        if(titleMatch && logoMatch && categoryMatch) {
           movies.push({
             title: titleMatch[1],
             logo: logoMatch[1],
@@ -204,7 +185,7 @@ async function fetchMovies() {
     }
     
     return movies;
-  } catch (error) {
+  } catch(error) {
     console.error('Error fetching movies:', error);
     return [];
   }
@@ -214,11 +195,15 @@ function renderMovies(movies, filter = 'all', searchTerm = '') {
   const grid = document.getElementById('moviesGrid');
   grid.innerHTML = '';
   
-  let filteredMovies = filter === 'all' ? movies : movies.filter(movie => movie.category.includes(filter));
-  
+  let filteredMovies = filter === 'all' 
+    ? movies 
+    : movies.filter(movie => movie.category.includes(filter));
+    
   if (searchTerm) {
     const searchLower = searchTerm.toLowerCase();
-    filteredMovies = filteredMovies.filter(movie => movie.title.toLowerCase().includes(searchLower));
+    filteredMovies = filteredMovies.filter(movie => 
+      movie.title.toLowerCase().includes(searchLower)
+    );
   }
   
   if (filteredMovies.length === 0) {
@@ -239,7 +224,43 @@ function renderMovies(movies, filter = 'all', searchTerm = '') {
     `;
     
     card.addEventListener('click', () => {
-      document.getElementById('videoPlayer').src = movie.url;
+      const iframeContainer = document.createElement('div');
+      iframeContainer.style.position = 'fixed';
+      iframeContainer.style.top = '0';
+      iframeContainer.style.left = '0';
+      iframeContainer.style.width = '100%';
+      iframeContainer.style.height = '100%';
+      iframeContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+      iframeContainer.style.zIndex = '1000';
+      iframeContainer.style.display = 'flex';
+      iframeContainer.style.alignItems = 'center';
+      iframeContainer.style.justifyContent = 'center';
+      
+      const iframe = document.createElement('iframe');
+      iframe.src = movie.url;
+      iframe.style.width = '80%';
+      iframe.style.height = '80%';
+      iframe.style.border = 'none';
+      
+      const closeButton = document.createElement('button');
+      closeButton.innerText = 'Fechar';
+      closeButton.style.position = 'absolute';
+      closeButton.style.top = '20px';
+      closeButton.style.right = '20px';
+      closeButton.style.padding = '10px 20px';
+      closeButton.style.backgroundColor = '#E50914';
+      closeButton.style.color = '#fff';
+      closeButton.style.border = 'none';
+      closeButton.style.cursor = 'pointer';
+      closeButton.style.zIndex = '1001';
+      
+      closeButton.addEventListener('click', () => {
+        document.body.removeChild(iframeContainer);
+      });
+
+      iframeContainer.appendChild(iframe);
+      iframeContainer.appendChild(closeButton);
+      document.body.appendChild(iframeContainer);
     });
 
     grid.appendChild(card);
@@ -252,7 +273,9 @@ window.addEventListener('load', async () => {
   let currentFilter = 'all';
   
   const searchInput = document.getElementById('searchInput');
-  searchInput.addEventListener('input', (e) => renderMovies(movies, currentFilter, e.target.value));
+  searchInput.addEventListener('input', (e) => {
+    renderMovies(movies, currentFilter, e.target.value);
+  });
 
   const filterButtons = document.querySelectorAll('.filter-btn');
   filterButtons.forEach(button => {
