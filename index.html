@@ -239,9 +239,17 @@ function renderMovies(movies, filter = 'all', searchTerm = '') {
       
       const iframe = document.createElement('iframe');
       iframe.src = movie.url;
-      iframe.style.width = '80%';
-      iframe.style.height = '80%';
-      iframe.style.border = 'none';
+
+      // Verificar se a URL é válida para embed
+      if (movie.url.startsWith('https://www.youtube.com/embed/') || movie.url.startsWith('https://vimeo.com/')) {
+        iframe.style.width = '80%';
+        iframe.style.height = '80%';
+        iframe.style.border = 'none';
+      } else {
+        // Se não for compatível, exibe uma mensagem
+        alert("O vídeo não pode ser carregado nesse iframe.");
+        return;
+      }
       
       const closeButton = document.createElement('button');
       closeButton.innerText = 'Fechar';
@@ -268,7 +276,7 @@ function renderMovies(movies, filter = 'all', searchTerm = '') {
   });
 }
 
-// Initialize
+// Inicializar
 window.addEventListener('load', async () => {
   const movies = await fetchMovies();
   let currentFilter = 'all';
