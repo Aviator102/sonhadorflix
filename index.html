@@ -132,40 +132,6 @@
       padding: 20px;
       font-size: 1.2rem;
     }
-    
-    /* Estilo do modal */
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.8);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-
-    .modal iframe {
-      width: 80%;
-      height: 80%;
-      border: none;
-    }
-
-    .close-btn {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background-color: #E50914;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      font-size: 1rem;
-      cursor: pointer;
-      z-index: 1001;
-    }
-
   </style>
 </head>
 <body>
@@ -189,23 +155,17 @@
   </div>
 </div>
 
-<!-- Modal para o vídeo -->
-<div class="modal" id="videoModal">
-  <button class="close-btn" onclick="closeModal()">Fechar</button>
-  <iframe id="videoIframe" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-
 <script>
 async function fetchMovies() {
   try {
-    const response = await fetch('filmes.txt'); 
+    const response = await fetch('https://raw.githubusercontent.com/Aviator102/iptvfree/refs/heads/main/serie8');
     const text = await response.text();
     
     const lines = text.split('\n');
     const movies = [];
     
-    for (let i = 0; i < lines.length; i++) {
-      if (lines[i].startsWith('#EXTINF')) {
+    for(let i = 0; i < lines.length; i++) {
+      if(lines[i].startsWith('#EXTINF')) {
         const movieInfo = lines[i];
         const movieUrl = lines[i + 1];
         
@@ -213,7 +173,7 @@ async function fetchMovies() {
         const logoMatch = movieInfo.match(/tvg-logo="([^"]+)"/);
         const categoryMatch = movieInfo.match(/group-title="([^"]+)"/);
         
-        if (titleMatch && logoMatch && categoryMatch) {
+        if(titleMatch && logoMatch && categoryMatch) {
           movies.push({
             title: titleMatch[1],
             logo: logoMatch[1],
@@ -225,8 +185,8 @@ async function fetchMovies() {
     }
     
     return movies;
-  } catch (error) {
-    console.error('Erro ao carregar filmes:', error);
+  } catch(error) {
+    console.error('Error fetching movies:', error);
     return [];
   }
 }
@@ -264,28 +224,50 @@ function renderMovies(movies, filter = 'all', searchTerm = '') {
     `;
     
     card.addEventListener('click', () => {
-      openModal(movie.url);
+      const iframeContainer = document.createElement('div');
+      iframeContainer.style.position = 'fixed';
+      iframeContainer.style.top = '0';
+      iframeContainer.style.left = '0';
+      iframeContainer.style.width = '100%';
+      iframeContainer.style.height = '100%';
+      iframeContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+      iframeContainer.style.zIndex = '1000';
+      iframeContainer.style.display = 'flex';
+      iframeContainer.style.alignItems = 'center';
+      iframeContainer.style.justifyContent = 'center';
+      
+      const iframe = document.createElement('iframe');
+      iframe.src = movie.url;
+      iframe.style.width = '80%';
+      iframe.style.height = '80%';
+      iframe.style.border = 'none';
+      
+      const closeButton = document.createElement('button');
+      closeButton.innerText = 'Fechar';
+      closeButton.style.position = 'absolute';
+      closeButton.style.top = '20px';
+      closeButton.style.right = '20px';
+      closeButton.style.padding = '10px 20px';
+      closeButton.style.backgroundColor = '#E50914';
+      closeButton.style.color = '#fff';
+      closeButton.style.border = 'none';
+      closeButton.style.cursor = 'pointer';
+      closeButton.style.zIndex = '1001';
+      
+      closeButton.addEventListener('click', () => {
+        document.body.removeChild(iframeContainer);
+      });
+
+      iframeContainer.appendChild(iframe);
+      iframeContainer.appendChild(closeButton);
+      document.body.appendChild(iframeContainer);
     });
 
     grid.appendChild(card);
   });
 }
 
-function openModal(videoUrl) {
-  const modal = document.getElementById('videoModal');
-  const iframe = document.getElementById('videoIframe');
-  iframe.src = videoUrl;
-  modal.style.display = 'flex';
-}
-
-function closeModal() {
-  const modal = document.getElementById('videoModal');
-  const iframe = document.getElementById('videoIframe');
-  iframe.src = '';  // Limpar a URL do iframe ao fechar
-  modal.style.display = 'none';
-}
-
-// Inicializar
+// Initialize
 window.addEventListener('load', async () => {
   const movies = await fetchMovies();
   let currentFilter = 'all';
