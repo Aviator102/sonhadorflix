@@ -160,23 +160,28 @@
   </div>
 
   <script>
+    // Função para buscar filmes de 'filmes.txt'
     async function fetchMovies() {
       try {
-        const response = await fetch('https://raw.githubusercontent.com/Aviator102/iptvfree/refs/heads/main/serie8');
+        // A URL para o arquivo filmes.txt
+        const response = await fetch('filmes.txt');
         const text = await response.text();
         
         const lines = text.split('\n');
         const movies = [];
         
+        // Processa as linhas do arquivo para extrair informações dos filmes
         for (let i = 0; i < lines.length; i++) {
           if (lines[i].startsWith('#EXTINF')) {
             const movieInfo = lines[i];
             const movieUrl = lines[i + 1];
             
+            // Extração dos dados do filme usando expressões regulares
             const titleMatch = movieInfo.match(/tvg-name="([^"]+)"/);
             const logoMatch = movieInfo.match(/tvg-logo="([^"]+)"/);
             const categoryMatch = movieInfo.match(/group-title="([^"]+)"/);
             
+            // Se encontrar todos os dados, adiciona o filme à lista
             if (titleMatch && logoMatch && categoryMatch) {
               movies.push({
                 title: titleMatch[1],
@@ -190,11 +195,12 @@
         
         return movies;
       } catch (error) {
-        console.error('Error fetching movies:', error);
+        console.error('Erro ao buscar filmes:', error);
         return [];
       }
     }
 
+    // Função para renderizar os filmes na tela
     function renderMovies(movies, filter = 'all', searchTerm = '') {
       const grid = document.getElementById('moviesGrid');
       grid.innerHTML = '';
@@ -235,19 +241,19 @@
       });
     }
 
-    // Initialize
+    // Inicializa o aplicativo ao carregar a página
     window.addEventListener('load', async () => {
-      const movies = await fetchMovies();
+      const movies = await fetchMovies(); // Busca os filmes
       let currentFilter = 'all';
       
-      // Setup search
+      // Setup da busca
       const searchInput = document.getElementById('searchInput');
       searchInput.addEventListener('input', (e) => {
         const searchTerm = e.target.value;
-        renderMovies(movies, currentFilter, searchTerm);
+        renderMovies(movies, currentFilter, searchTerm); // Atualiza os filmes conforme a pesquisa
       });
       
-      // Setup filter buttons
+      // Setup dos botões de filtro
       const filterButtons = document.querySelectorAll('.filter-btn');
       filterButtons.forEach(button => {
         button.addEventListener('click', () => {
@@ -255,11 +261,11 @@
           button.classList.add('active');
           
           currentFilter = button.dataset.filter;
-          renderMovies(movies, currentFilter, searchInput.value);
+          renderMovies(movies, currentFilter, searchInput.value); // Atualiza os filmes conforme o filtro
         });
       });
       
-      // Initial render
+      // Exibe os filmes ao carregar
       renderMovies(movies);
     });
   </script>
