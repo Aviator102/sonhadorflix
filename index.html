@@ -63,6 +63,9 @@
     .filters {
       display: flex;
       gap: 15px;
+      flex-wrap: wrap; /* Permite que os filtros empilhem em telas pequenas */
+      justify-content: center; /* Centraliza os filtros */
+      margin-top: 15px; /* Espaço entre filtros e a grid de filmes */
     }
 
     .filter-btn {
@@ -73,6 +76,7 @@
       border-radius: 4px;
       cursor: pointer;
       transition: background 0.3s;
+      margin-bottom: 10px; /* Garante espaçamento quando empilhados */
     }
 
     .filter-btn.active {
@@ -151,10 +155,9 @@
       }
 
       .filters {
-        flex-wrap: wrap;
         justify-content: center;
         gap: 10px;
-        margin-top: 15px;
+        margin-top: 20px; /* Aumenta o espaço entre filtros e a grid de filmes */
       }
 
       .movies-grid {
@@ -289,19 +292,19 @@
             }
             return movie.category.toLowerCase().includes(filter.toLowerCase());
           });
-        
+    
       if (searchTerm) {
         const searchLower = searchTerm.toLowerCase();
         filteredMovies = filteredMovies.filter(movie => 
           movie.title.toLowerCase().includes(searchLower)
         );
       }
-      
+    
       if (filteredMovies.length === 0) {
         grid.innerHTML = '<div class="loading">Nenhum título encontrado</div>';
         return;
       }
-      
+    
       filteredMovies.forEach(movie => {
         const card = document.createElement('div');
         card.className = 'movie-card';
