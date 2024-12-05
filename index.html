@@ -174,7 +174,6 @@
       }
     }
 
-    /* Media Query para telas muito pequenas (celulares em modo retrato) */
     @media (max-width: 480px) {
       .logo {
         font-size: 1.5rem;
@@ -226,6 +225,7 @@
       <button class="filter-btn" data-filter="Filmes">Filmes</button>
       <button class="filter-btn" data-filter="Séries">Séries</button>
       <button class="filter-btn" data-filter="Lançamentos">Lançamentos</button>
+      <button class="filter-btn" data-filter="Adultos">Adultos</button>
     </div>
   </div>
 
@@ -283,7 +283,12 @@
       
       let filteredMovies = filter === 'all' 
         ? movies 
-        : movies.filter(movie => movie.category.includes(filter));
+        : movies.filter(movie => {
+            if (filter === 'Adultos' && movie.category.toLowerCase().includes('adultos')) {
+              return true;
+            }
+            return movie.category.toLowerCase().includes(filter.toLowerCase());
+          });
         
       if (searchTerm) {
         const searchLower = searchTerm.toLowerCase();
