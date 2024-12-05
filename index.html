@@ -137,6 +137,82 @@
       padding: 20px;
       font-size: 1.2rem;
     }
+
+    /* Media Queries para tornar a página responsiva */
+    @media (max-width: 768px) {
+      .navbar {
+        flex-direction: column;
+        padding: 15px;
+      }
+
+      .search-box {
+        flex: 1 1 100%;
+        margin-top: 10px;
+      }
+
+      .filters {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 15px;
+      }
+
+      .movies-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      }
+
+      .movie-poster {
+        height: 250px;
+      }
+
+      .movie-title {
+        font-size: 0.8rem;
+      }
+
+      .movie-category {
+        font-size: 0.7rem;
+      }
+    }
+
+    /* Media Query para telas muito pequenas (celulares em modo retrato) */
+    @media (max-width: 480px) {
+      .logo {
+        font-size: 1.5rem;
+      }
+
+      .search-input {
+        font-size: 0.9rem;
+      }
+
+      .filters {
+        display: block;
+        margin-top: 20px;
+      }
+
+      .filter-btn {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        text-align: center;
+        margin-bottom: 10px;
+      }
+
+      .movies-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      }
+
+      .movie-poster {
+        height: 200px;
+      }
+
+      .movie-title {
+        font-size: 0.75rem;
+      }
+
+      .movie-category {
+        font-size: 0.65rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -241,16 +317,16 @@
       });
     }
 
-    // Inicializa o aplicativo ao carregar a página
+    // Inicializa a página
     window.addEventListener('load', async () => {
-      const movies = await fetchMovies(); // Busca os filmes
+      const movies = await fetchMovies();
       let currentFilter = 'all';
       
       // Setup da busca
       const searchInput = document.getElementById('searchInput');
       searchInput.addEventListener('input', (e) => {
         const searchTerm = e.target.value;
-        renderMovies(movies, currentFilter, searchTerm); // Atualiza os filmes conforme a pesquisa
+        renderMovies(movies, currentFilter, searchTerm);
       });
       
       // Setup dos botões de filtro
@@ -261,11 +337,11 @@
           button.classList.add('active');
           
           currentFilter = button.dataset.filter;
-          renderMovies(movies, currentFilter, searchInput.value); // Atualiza os filmes conforme o filtro
+          renderMovies(movies, currentFilter, searchInput.value);
         });
       });
       
-      // Exibe os filmes ao carregar
+      // Renderização inicial
       renderMovies(movies);
     });
   </script>
